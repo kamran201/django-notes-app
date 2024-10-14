@@ -1,43 +1,30 @@
-@Library("Shared") _
-pipeline{
-    
-    agent { label "vinod"}
-    
+pipeline {
+    agent any
+
     stages{
-        
-        stage("Hello"){
+        stage('cloning'){
             steps{
-                script{
-                    hello()
-                }
+                echo 'this is cloning the code'
+                git url:'https://github.com/kamran201/django-notes-app.git',branch:'main'
+                echo 'code clone successfully done'
             }
         }
-        stage("Code"){
+        stage('making a docker image'){
+            
             steps{
-               script{
-                clone("https://github.com/LondheShubham153/django-notes-app.git","main")
-               }
+                echo 'creating docker image'
+                sh 'docker build -t notes-app . '
+                echo 'image create succesful'
                 
             }
         }
-        stage("Build"){
+        stage('DEPLOYING '){
             steps{
-                script{
-                docker_build("notes-app","latest","trainwithshubham")
-                }
-            }
-        }
-        stage("Push to DockerHub"){
-            steps{
-                script{
-                    docker_push("notes-app","latest","trainwithshubham")
-                }
-            }
-        }
-        stage("Deploy"){
-            steps{
-                echo "This is deploying the code"
-                sh "docker compose down && docker compose up -d"
+                echo 'this is deploying the code'
+                sh 'docker run -d -p 8000:8000 notes-app'
+                echo'deploying successfully '
+                
+            
             }
         }
     }
